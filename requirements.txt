@@ -1,0 +1,2 @@
+yt_dlp==2024.4.9
+youtubesearchpython==1.6.6
