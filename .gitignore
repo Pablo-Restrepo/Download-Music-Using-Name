@@ -1,0 +1,10 @@
+# Python
+*.pyc
+__pycache__/
+venv/
+*.env
+# Audio and Video files
+*.mp3
+*.wav
+*.mp4
+*.avi
