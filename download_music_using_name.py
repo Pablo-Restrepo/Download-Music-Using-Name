@@ -48,7 +48,7 @@ def get_title(result):
     return result['result'][0]['title']
 
 
-def download_audio(url, file_name):
+def download_song(url, file_name):
     """
     Download the audio of a YouTube video in MP3 format.
 
@@ -121,7 +121,7 @@ def download_music_with_name(song_name):
     link = get_link(result)
     title = get_title(result)
     file_name = remove_words(title)
-    mp3_file = download_audio(link, file_name)
+    mp3_file = download_song(link, file_name)
 
     return mp3_file
 
