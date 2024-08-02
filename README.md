@@ -1,6 +1,6 @@
 # Download Music Using Name
 
-This project allows you to download music by searching for songs using their names. 
+This project allows you to download music using song names.
 
 ## Requirements
 
