@@ -1,150 +1,154 @@
-'''
-This script allows you to download music from YouTube based on the name of the song.
-'''
+"""
+This script allows you to download music videos from YouTube based on the song name.
+"""
 
 import re
 import yt_dlp
 from youtubesearchpython import VideosSearch
 
-MUSIC_FOLDER = 'music/'
 
-
-def search_music(user_input):
+class YouTubeMusicDownloader:
     """
-    Search for music videos on YouTube based on user input.
-
-    Args:
-        user_input (str): The search query entered by the user.
-
-    Returns:
-        dict: The search result containing information about the videos found.
+    A class to download music videos from YouTube based on the song name.
     """
-    return VideosSearch(user_input, limit=1).result()
+    MUSIC_FOLDER = 'music/'
 
+    @staticmethod
+    def __search_music(user_input):
+        """
+        Search for music videos on YouTube based on user input.
 
-def get_link(result):
-    """
-    Get the YouTube video link from the search result.
+        Args:
+            user_input (str): The search query entered by the user.
 
-    Args:
-        result (dict): The search result containing information about the videos found.
+        Returns:
+            dict: The search result containing information about the videos found.
+        """
+        return VideosSearch(user_input, limit=1).result()
 
-    Returns:
-        str: The YouTube video link.
-    """
-    return result['result'][0]['link']
+    @staticmethod
+    def __get_link(result):
+        """
+        Get the YouTube video link from the search result.
 
+        Args:
+            result (dict): The search result containing information about the videos found.
 
-def get_title(result):
-    """
-    Get the title of the YouTube video from the search result.
+        Returns:
+            str: The YouTube video link.
+        """
+        return result['result'][0]['link']
 
-    Args:
-        result (dict): The search result containing information about the videos found.
+    @staticmethod
+    def __get_title(result):
+        """
+        Get the title of the YouTube video from the search result.
 
-    Returns:
-        str: The title of the YouTube video.
-    """
-    return result['result'][0]['title']
+        Args:
+            result (dict): The search result containing information about the videos found.
 
+        Returns:
+            str: The title of the YouTube video.
+        """
+        return result['result'][0]['title']
 
-def download_song(url, file_name):
-    """
-    Download the audio of a YouTube video in MP3 format.
+    @staticmethod
+    def __download_song(url, file_name):
+        """
+        Download the audio of a YouTube video in MP3 format.
 
-    Args:
-        url (str): The YouTube video link.
-        file_name (str): The name of the file to save the downloaded audio.
+        Args:
+            url (str): The YouTube video link.
+            file_name (str): The name of the file to save the downloaded audio.
 
-    Returns:
-        str: The name of the downloaded MP3 file.
-    """
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'outtmpl': MUSIC_FOLDER + file_name + '.%(ext)s',
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-        'noplaylist': True,
-    }
+        Returns:
+            str: The name of the downloaded MP3 file.
+        """
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'outtmpl': YouTubeMusicDownloader.MUSIC_FOLDER + file_name + '.%(ext)s',
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
+            'noplaylist': True,
+        }
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
 
-    return file_name + '.mp3'
+        return file_name + '.mp3'
 
+    @staticmethod
+    def __remove_words(text):
+        """
+        Remove specific words and characters from a text.
 
-def remove_words(text):
-    """
-    Remove specific words and characters from a text.
+        Args:
+            text (str): The text to remove words from.
 
-    Args:
-        text (str): The text to remove words from.
+        Returns:
+            str: The text with the specified words removed.
+        """
+        emoji_pattern = re.compile('['
+                                   u'\U0001F600-\U0001F64F'
+                                   u'\U0001F300-\U0001F5FF'
+                                   u'\U0001F680-\U0001F6FF'
+                                   u'\U0001F1E0-\U0001F1FF'
+                                   u'\U00002702-\U000027B0'
+                                   u'\U000024C2-\U0001F251'
+                                   ']+', flags=re.UNICODE)
 
-    Returns:
-        str: The text with the specified words removed.
-    """
-    emoji_pattern = re.compile('['
-                               u'\U0001F600-\U0001F64F'
-                               u'\U0001F300-\U0001F5FF'
-                               u'\U0001F680-\U0001F6FF'
-                               u'\U0001F1E0-\U0001F1FF'
-                               u'\U00002702-\U000027B0'
-                               u'\U000024C2-\U0001F251'
-                               ']+', flags=re.UNICODE)
+        words = ['lyrics', 'official', 'video', 'audio', 'music', 'hd', 'hq',
+                 'lyric', 'remastered', 'remaster', 'oficial', '(', ')', 'visulizer',
+                 'letra', '/', '  ', '|', '[', ']', '{', '}']
 
-    words = ['lyrics', 'official', 'video', 'audio', 'music', 'hd', 'hq',
-             'lyric', 'remastered', 'remaster', 'oficial', '(', ')', 'visulizer',
-             'letra', '/', '  ', '|', '[', ']', '{', '}']
+        text = emoji_pattern.sub(r'', text)
 
-    text = emoji_pattern.sub(r'', text)
+        for word in words:
+            text = re.sub(re.escape(word), '', text, flags=re.IGNORECASE)
 
-    for word in words:
-        text = re.sub(re.escape(word), '', text, flags=re.IGNORECASE)
+        return text.strip()
 
-    return text.strip()
+    def download_music_with_name(self, song_name):
+        """
+        Download a music video from YouTube based on the song name.
 
+        Args:
+            song_name (str): The name of the song.
 
-def download_music_with_name(song_name):
-    """
-    Download a music video from YouTube based on the song name.
+        Returns:
+            str: The name of the downloaded MP3 file.
+        """
+        result = self.__search_music(song_name)
+        link = self.__get_link(result)
+        title = self.__get_title(result)
+        file_name = self.__remove_words(title)
+        mp3_file = self.__download_song(link, file_name)
 
-    Args:
-        song_name (str): The name of the song.
+        return mp3_file
 
-    Returns:
-        str: The name of the downloaded MP3 file.
-    """
-    result = search_music(song_name)
-    link = get_link(result)
-    title = get_title(result)
-    file_name = remove_words(title)
-    mp3_file = download_song(link, file_name)
+    def main(self):
+        """
+        Main function to run the program.
 
-    return mp3_file
+        Prompts the user to enter the name of a song and downloads the corresponding music video.
+        """
+        print('Type "0" to quit the program.')
+        while True:
+            print('')
+            song_name = input('Enter the name of the song: ')
+            if song_name == '0':
+                break
 
-
-def main():
-    """
-    Main function to run the program.
-
-    Prompts the user to enter the name of a song and downloads the corresponding music video.
-    """
-    print('Type "0" to quit the program.')
-    while True:
-        print('')
-        song_name = input('Enter the name of the song: ')
-        if song_name == '0':
-            break
-
-        try:
-            mp3_file = download_music_with_name(song_name + ' lyrics')
-            print('The song has been downloaded successfully:', mp3_file)
-        except Exception as e:
-            print('An error occurred while downloading the song:', e)
+            try:
+                mp3_file = self.download_music_with_name(song_name + ' lyrics')
+                print('The song has been downloaded successfully:', mp3_file)
+            except Exception as e:
+                print('An error occurred while downloading the song:', e)
 
 
 if __name__ == '__main__':
-    main()
+    downloader = YouTubeMusicDownloader()
+    downloader.main()
